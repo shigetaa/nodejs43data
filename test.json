@@ -1,0 +1,8 @@
+{
+	"group": "vegetable",
+	"items": [
+		{"name":"Tomato", "price":300},
+		{"name":"Banana", "price":170},
+		{"name":"Apple", "price":210}
+	]
+}
