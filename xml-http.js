@@ -1,4 +1,3 @@
-var fs = require('fs');
 var cheerio = require('cheerio-httpcli');
 // XMLファイルを読み込むURL
 var url = "https://rss-weather.yahoo.co.jp/rss/days/6200.xml";
