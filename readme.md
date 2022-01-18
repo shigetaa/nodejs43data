@@ -286,7 +286,6 @@ npm i cheerio-httpcli
 Yahoo!天気予報のRSSファイルをネット経由でプログラムで解析出力してみます。
 
 ```javascript
-var fs = require('fs');
 var cheerio = require('cheerio-httpcli');
 // XMLファイルを読み込むURL
 var url = "https://rss-weather.yahoo.co.jp/rss/days/6200.xml";
