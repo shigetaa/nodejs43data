@@ -203,3 +203,123 @@ cso2json test.cson > test.json
 ```
 
 ## XML / RSS 形式とは
+
+XMLやRSSは、バイナリデータでは無く、テキストデータです。
+テキストファイルを利用して編集することができます。
+タグによって、データをマークアップすることが出来、タグを入れ子状の階層構造にすることもできます。
+
+以下のXMLの基本工場を表す物です。
+```xml
+<要素名 属性="属性値">内容</要素名>
+```
+そして、この要素を異なる要素でグループ化することが出来ます。
+これにより要素を階層化することができます。
+```xml
+<商品グループ type="電子機器">
+  <商品 id="s001" price="1500">SDカード</商品>
+  <商品 id="1002" price="2000">USBメモリ</商品>
+</商品グループ>
+```
+この様な、XML形式のデータを扱うために、「`xml2js`」「`cheerio`」の様なモジュールを使うとデータを操作しやすくなります。
+
+今回は、CSSセレクタ名みたいな感じで、XMLデータを操作出来る、モジュールとして「`cheerio`」を使用してみます。
+
+### cheerio インストール
+
+以下のコマンドで`cheerio`インストールします。
+
+```bash
+npm i cheerio
+```
+### cheerio で XMLを解析してみる
+
+今回のプログラムを`xml-read.js`と言うファイル名で作成します。
+
+Yahoo!天気予報のRSSファイルをダウンロードしてきて、プログラムで解析出力してみます。
+```javascript
+var fs = require('fs');
+var cheerio = require('cheerio');
+// XMLファイルを読み込む
+var xml = fs.readFileSync("rss-weather-osaka.xml", "utf-8");
+// XML ファイルをパースする
+$ = cheerio.load(xml);
+
+$("item > title").each(function (idx) {
+	var title = $(this).text();
+	console.log(title);
+});
+```
+以下のコマンドを実行すると、ダウンロードしたxmlファイルを解析して出力します。
+
+```bash
+node xml-read.js
+```
+```bash
+【 18日（火） 大阪（大阪） 】 曇のち晴 - 8℃/2℃ - Yahoo!天気・災害
+【 19日（水） 大阪（大阪） 】 曇時々晴 - 7℃/1℃ - Yahoo!天気・災害
+【 20日（木） 大阪（大阪） 】 晴時々曇 - 8℃/3℃ - Yahoo!天気・災害
+【 21日（金） 大阪（大阪） 】 曇時々晴 - 6℃/1℃ - Yahoo!天気・災害
+【 22日（土） 大阪（大阪） 】 晴時々曇 - 8℃/1℃ - Yahoo!天気・災害
+【 23日（日） 大阪（大阪） 】 曇時々晴 - 10℃/2℃ - Yahoo!天気・災害
+【 24日（月） 大阪（大阪） 】 曇時々雨 - 10℃/4℃ - Yahoo!天気・災害
+【 25日（火） 大阪（大阪） 】 曇一時雨 - 11℃/4℃ - Yahoo!天気・災害
+【 大阪市 】注意報があります - Yahoo!天気・災害
+【 北大阪 】注意報があります - Yahoo!天気・災害
+【 東部大阪 】注意報があります - Yahoo!天気・災害
+【 南河内 】注意報があります - Yahoo!天気・災害
+【 泉州 】注意報があります - Yahoo!天気・災害
+```
+無事にxml を解析して出力してますが、ダウンロードする手間がありますので、プログラムが直接、xmlファイルを見に行って解析出力するプログラムを作成してみます。
+
+### cheerio-httpcli インストール
+上記の`cheerio`モジュールにネットワーク経由でxmlを解析するモジュール`cheerio-httpcli`をインストールしてみます。
+
+以下のコマンドで`cheerio-httpcli`インストールします。
+
+```bash
+npm i cheerio-httpcli
+```
+### cheerio-httpcli で XMLを解析してみる
+
+今回のプログラムを`xml-http.js`と言うファイル名で作成します。
+
+Yahoo!天気予報のRSSファイルをネット経由でプログラムで解析出力してみます。
+
+```javascript
+var fs = require('fs');
+var cheerio = require('cheerio-httpcli');
+// XMLファイルを読み込むURL
+var url = "https://rss-weather.yahoo.co.jp/rss/days/6200.xml";
+
+// XML ファイルをHTTP経由で取得してパースする
+cheerio.fetch(url, {}, function (err, $, res) {
+	$("item > title").each(function (idx) {
+		var title = $(this).text();
+		console.log(title);
+	});
+});
+```
+
+以下のコマンドを実行すると、ネット経由で通信してxmlを解析して出力します。
+
+```bash
+node xml-http.js
+```
+```bash
+【 18日（火） 大阪（大阪） 】 曇のち晴 - 8℃/2℃ - Yahoo!天気・災害
+【 19日（水） 大阪（大阪） 】 曇時々晴 - 7℃/1℃ - Yahoo!天気・災害
+【 20日（木） 大阪（大阪） 】 晴時々曇 - 8℃/3℃ - Yahoo!天気・災害
+【 21日（金） 大阪（大阪） 】 曇時々晴 - 6℃/1℃ - Yahoo!天気・災害
+【 22日（土） 大阪（大阪） 】 晴時々曇 - 8℃/1℃ - Yahoo!天気・災害
+【 23日（日） 大阪（大阪） 】 曇時々晴 - 10℃/2℃ - Yahoo!天気・災害
+【 24日（月） 大阪（大阪） 】 曇時々雨 - 10℃/4℃ - Yahoo!天気・災害
+【 25日（火） 大阪（大阪） 】 曇一時雨 - 11℃/4℃ - Yahoo!天気・災害
+【 大阪市 】注意報があります - Yahoo!天気・災害
+【 北大阪 】注意報があります - Yahoo!天気・災害
+【 東部大阪 】注意報があります - Yahoo!天気・災害
+【 南河内 】注意報があります - Yahoo!天気・災害
+【 泉州 】注意報があります - Yahoo!天気・災害
+```
+
+xml 形式の解析の仕方は、`cheerio` と `cheerio-httpcli` は同じなので
+解析するファイルの保存場所によって、使い分けるといいでしょう。
