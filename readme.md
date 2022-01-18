@@ -507,7 +507,7 @@ name4=value4
 ```
 セミコロン `;` から始まる、コメントを記述する事も出来ます。
 
-この様なINIファイル形式のデータを扱う為に「」モジュールを使うとデータを操作しやすくなります。
+この様なINIファイル形式のデータを扱う為に「`ini`」モジュールを使うとデータを操作しやすくなります。
 
 ### ini インストール
 
@@ -563,6 +563,143 @@ Apple 200 red
 Banana 100 yellow
 ```
 
-## CSV形式とは
+## CSV / TSV ファイル形式とは
 
+Webで公開されているデータで、実は、XML以上に流通しているのではないかと思われるのが、CSVファイル、TSVファイル形式です。
+その理由は、フォーマットが非常にシンプルであることに加えて、各種のデータがExcelで作成されていることや、多くのデータベースがCSV形式のエクスポートをサポートしている為だとおもいます。
 
+***
+CSV ファイルとは
+> Comma-Separated Values
+
+カンマ区切りデータともよばれています。
+それは、各フィールドがカンマで区切られているデータであるからです。
+CSVファイルはテキストファイルであるので、テキストエディタで用意に編集が出来ます。
+***
+TSCファイルとは
+> Tab-Separated Values
+
+タブ区切りデータとも呼ばれています。
+***
+SSVファイルとは
+> Space-Separated Values
+
+スペース久区切りデータとも呼ばれています。
+***
+
+CSVファイルの構造は、1つ以上のレコードから成り立っています。
+レコードは1つ以上の同じ個数のフィールドで成り立っています。
+フィールドはカンマ「,」で区切られています。
+ちなみにフィールドの先頭レコードは、ヘッダ行があっても良いことになってます。
+
+```csv
+ID, 商品名, 値段
+01, 石鹸, 300
+02, 手袋, 150
+03, マスク, 230
+```
+
+各フィールドは以下の様に、ダブルコーテーション「`"`」で囲んでも良いことになってます。(囲んでも、囲まなくてもいいとの事)
+```csv
+"01", "石鹸", "300"
+"02", "手袋", "150"
+"03", "マスク", "230"
+```
+
+ただし、フィールドの中に、ダブルコーテーション「`"`」やカンマ、改行を含む場合は、必ずダブルコーテーションで囲む事になってます。
+
+このとき、ダブルコーテーションをエスケープするには、二重にダブルコーテーションを記述し「`"手袋""特別""日本製"`」の様に記述すると、データとしては「`手袋"特別"日本製`」として扱われます
+```csv
+"01", "石鹸", "300"
+"02", "手袋""特別""日本製", "150"
+"03", "マスク", "230"
+```
+
+CSVファイルを扱うには、日本語データを含む多数の文字コードを扱うので文字コードを変換するモジュール「`iconv-lite`」が必要になります。
+CSVファイル形式のデータを扱う為に「`comma-separated-values`」モジュールを使用します。
+
+### comma-separated-values , iconv インストール
+
+以下のコマンドで`comma-separated-values` `iconv-lite` インストールします。
+
+```bash
+npm i iconv-lite comma-separated-values
+```
+### comma-separated-values で CSVを解析してみる
+
+CSV形式のデータファイルを`data.csv`と言うファイル名で作成します。
+
+```csv
+id, name, price
+01, 石鹸, 300
+02, 手袋, 150
+03, マスク, 230
+```
+
+CSVを解析するプログラムを`csv-read.js`と言うファイル名で作成します。
+
+```javascript
+var CSV = require('comma-separated-values');
+var iconv = require('iconv-lite');
+var fs = require('fs');
+
+// CSVデータを読み込む
+var txt = fs.readFileSync('data.csv');
+// iconv-lite で UTF-8 に変換する
+txt = iconv.decode(txt, 'SHIFT_JIS');
+
+// CSVファイルをパースする
+var csv = new CSV(txt, { header: false });
+var records = csv.parse();
+// 1行目はヘッダなので削除する
+records.shift();
+
+// データを表示
+for (var i = 0; i < records.length; i++) {
+	var fs = records[i];
+	var name = fs[1];
+	var price = fs[2];
+	console.log(name, price);
+}
+```
+以下のコマンドを実行すると、CSVを解析して出力します。
+
+```bash
+node csv-read.js
+```
+```bash
+ 石鹸  300
+ 手袋  150
+ マスク  230
+```
+
+上記の例では、CSVファイルを配列に変換しましたが、下記の`csv-read2.js`を作成してオブジェクトに変換して表示するプログラムを作成してみます。
+
+```javascript
+var CSV = require('comma-separated-values');
+var iconv = require('iconv-lite');
+var fs = require('fs');
+
+// CSVデータを読み込む
+var txt = fs.readFileSync('data.csv');
+// iconv-lite で UTF-8 に変換する
+txt = iconv.decode(txt, 'SHIFT_JIS');
+
+// CSVファイルをパースする
+var csv = new CSV(txt, { header: true });
+var records = csv.parse();
+
+console.log(records);
+```
+以下のコマンドを実行すると、CSVを解析して出力します。
+
+```bash
+node csv-read2.js
+```
+```bash
+[
+  { id: 1, ' name': ' 石鹸', ' price': 300 },
+  { id: 2, ' name': ' 手袋', ' price': 150 },
+  { id: 3, ' name': ' マスク', ' price': 230 }
+]
+```
