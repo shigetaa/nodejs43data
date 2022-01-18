@@ -483,7 +483,85 @@ Banana 100
 
 ## INIファイル形式とは
 
+INIファイル形式のデータがWebで配布されることは少ないかもしれないが、今でも、設定ファイルを記述する際に利用されているのがINIファイル形式です。
+この形式は、単純なテキストファイルであり、一時期は設定ファイルのデフォルトスタンダードでもあるとも言われていました、主に、Windowsで利用されたり、PHPの設定ファイルなどでもINIファイル形式で記述されています。
 
+基本的な構造は、以下の様にシンプルなものです。
+設定名と実際の値が「name=value」の形式で並んでいるだけです。
+
+```ini
+name1=value1
+name2=value2
+name3=value3
+```
+これに加えて、各設定値をグルーピングする為のセクションがあります。
+セクションは `[セクション名]` の様に記述します。
+```ini
+; INIにはコメントを残す事も可能
+[section1]
+name1=value1
+name2=value2
+[section2]
+name3=value3
+name4=value4
+```
+セミコロン `;` から始まる、コメントを記述する事も出来ます。
+
+この様なINIファイル形式のデータを扱う為に「」モジュールを使うとデータを操作しやすくなります。
+
+### ini インストール
+
+以下のコマンドで`ini`インストールします。
+
+```bash
+npm i ini
+```
+### ini で INIを解析してみる
+
+INIファイル形式のデータファイルを`data.ini`と言うファイル名で作成します。
+
+```ini
+; Fruis Database
+; version 1.2
+[Tomato]
+price=300
+color=red
+[Apple]
+price=200
+color=red
+[Banana]
+price=100
+color=yellow
+```
+
+INIファイルを解析するプログラムを`ini-read.js`と言うファイル名で作成します。
+
+```javascript
+var ini = require('ini');
+var fs = require('fs');
+
+// INIデータを読み込む
+var txt = fs.readFileSync('data.ini', 'utf-8');
+
+// JavaScript のオブジェクトに変換
+var obj = ini.parse(txt);
+
+// データを表示
+for (var name in obj) {
+	var item = obj[name];
+	console.log(name, item.price, item.color);
+}
+```
+以下のコマンドを実行すると、INIファイル形式を解析して出力します。
+
+```bash
+node ini-read.js
+```
+```bash
+Tomato 300 red
+Apple 200 red
+Banana 100 yellow
+```
 
 ## CSV形式とは
 
