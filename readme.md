@@ -322,3 +322,167 @@ node xml-http.js
 
 xml 形式の解析の仕方は、`cheerio` と `cheerio-httpcli` は同じなので
 解析するファイルの保存場所によって、使い分けるといいでしょう。
+
+## YAML形式とは
+
+YAML(ヤムル)とは、インデントを利用して階層構造を票券するのが特徴のデータ形式です。
+テキストデータなので、テキストエディタを用いて編集することができます。
+XMLよりシンプルで扱いやすいです。
+
+インデントを用いて階層構造を記述しますが、インデントにはタブが利用出来ず、スペースのみが利用できます。
+
+YAMLの基本は、配列、ハッシュ、スカラ（文字列・数値・真偽値など）です。
+配列を表すには、行頭にハイフン「-」をつけます。ハイフンの後には半角スペースが必要です。
+
+```yaml
+- banana
+- apple
+- tomato
+```
+この時半角スペースでインデントすると、配列中に配列を表現することが出来ます。
+ただし、インデントする直前には以下の様に空の要素を入れてください
+```yaml
+- Yellow
+-
+  - banana
+  - mikan
+- Red
+-
+  - apple
+  - strawberry
+```
+次に、ハッシュの書き方を紹介します。
+ハッシュとは、JavaScript のオブジェクトに相当する物で、「キー:値」の形式で記述します。
+```yaml
+name: tomato
+price: 120
+color: red
+```
+こちらもインデントすることで階層構造を表現できます。
+```yaml
+name: tomato
+property:
+  price: 120
+  color: red
+```
+配列とハッシュを組み合わせて、複雑なデータを表現できます。
+```yaml
+- name: tomato
+  price: 120
+  color: red
+  shops:
+    - "イオン"
+	- "ダイエー"
+- name: banana
+  price: 200
+  color: yellow
+  shops:
+    - "ローソン"
+	- "ファミマ"
+```
+加えて、YAMLにはフロースタイルが用意されており、これを利用すると、JSONと同じように、配列を、[n1, n2, n3, ...]で表現し、ハッシュを{key1:value1, key2:value2, ...}の様に表現できます。ただしカンマ`,`やコロン`:`の後には半角空白を入れる費用があります。
+```yaml
+- name: tomato
+  price: 120
+  color: red
+  shops: ["イオン", "ダイエー"]
+- name: banana
+  price: 200
+  color: yellow
+  shops: ["ローソン", "ファミマ"]
+```
+YAMLではコメントを記述することができます。コメントは「`#`」から始めます。
+また、複数行の文字列も指定することもできます。
+```yaml
+# YAMLにはコメントを残す事が可能
+multi-line: |
+ I like Banana.
+ I like Apple.
+ I like Tomato.
+```
+さらに、YAMLではアンカーエイリアスが利用出来ます。
+
+`&name` で印をつけておいて `*name` で参照することが出来ます。
+
+`&name` がアンカーで `*name` がエイリアスです。
+
+例で見てみましょう。以下のYAMLデータでは、冒頭で色を定義し、それ以降の部分で実際に色データを指定してます。
+```yaml
+# 色を定義
+color_define: 
+  - &color1 #FF0000
+  - &color2 #00FF00
+  - &color3 #00FFFF
+
+# 色を記述する
+frame_color:
+  title: *color1
+  logo: *color2
+article_color:
+  title: *color2
+  logo: *color3
+```
+この様な、YAML形式のデータを扱うために、「`js-yaml`」モジュールを使うとデータを操作しやすくなります。
+
+### js-yaml インストール
+
+以下のコマンドで`js-yaml`インストールします。
+
+```bash
+npm i js-yaml
+```
+### js-yaml で YAMLを解析してみる
+
+YAML形式のデータファイルを`data.yml`と言うファイル名で作成します。
+
+```yaml
+title: Fruits Database
+version: 1.2
+price-define:
+  - &one-coin 100
+  - &two-coin 200
+  - &three-coin 300
+items:
+  - name: Tomato
+    price: *three-coin
+  - name: Apple
+    price: *two-coin
+  - name: Banana
+    price: *one-coin
+
+```
+
+YAMLを解析するプログラムを`yaml-read.js`と言うファイル名で作成します。
+
+```javascript
+var yaml = require('js-yaml');
+var fs = require('fs');
+
+// YAMLデータを読み込む
+var txt = fs.readFileSync('data.yml', 'utf-8');
+
+// JavaScript のオブジェクトに変換
+var obj = yaml.load(txt);
+
+// データを表示
+for (var i in obj.items) {
+	var item = obj.items[i];
+	console.log(item.name, item.price);
+}
+```
+以下のコマンドを実行すると、YAMLを解析して出力します。
+
+```bash
+node yaml-read.js
+```
+```bash
+Tomato 300
+Apple 200
+Banana 100
+```
+
+## INIファイル形式とは
+
+
+## CSV形式とは
+

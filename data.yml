@@ -1,0 +1,13 @@
+title: Fruits Database
+version: 1.2
+price-define:
+  - &one-coin 100
+  - &two-coin 200
+  - &three-coin 300
+items:
+  - name: Tomato
+    price: *three-coin
+  - name: Apple
+    price: *two-coin
+  - name: Banana
+    price: *one-coin
